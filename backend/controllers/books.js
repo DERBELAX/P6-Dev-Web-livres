@@ -116,4 +116,75 @@ exports.getAllBooks = (req, res, next) => {
         .catch(error => res.status(500).json({ error: 'Failed to retrieve books' }));
 };
 
+exports.createRating = async (req, res) => {
+    try {
+        // Extraire les données de la requête (ID utilisateur et note)
+        const { userId, rating } = req.body
+        // Trouver le livre correspondant à l'ID dans les paramètres de la requête
+        const book = await Book.findById(req.params.id)
+
+        // Vérifier si la requête contient une note
+        if (!req.body) {
+            return res
+                .status(400)
+                .json({ message: 'Votre requête ne contient aucune note !' })
+        }
+
+        // Vérifier si l'utilisateur a déjà noté ce livre
+        if (book.ratings.some((rating) => rating.userId === userId)) {
+            return res
+                .status(400)
+                .json({ message: 'Vous avez déjà noté ce livre !' })
+        }
+
+        // Ajouter la note à la liste des notes du livre et calculer la moyenne
+        book.ratings.push({ userId: userId, grade: rating })
+        const grades = book.ratings.map((rating) => rating.grade)
+        const average =
+            grades.reduce((total, grade) => total + grade, 0) / grades.length
+        book.averageRating = parseFloat(average.toFixed(1))
+        await book.save()
+
+        // Envoyer une réponse avec le livre mis à jour
+        res.status(200).json(book)
+    } catch (error) {
+        // Gérer les erreurs et renvoyer une réponse avec l'erreur
+        console.error(error)
+        res.status(500).json({ error })
+    }
+};
+exports.getBestBooks = async (req, res) => {
+    try {
+        // Utiliser l'agrégation MongoDB pour projeter les champs souhaités et calculer la moyenne des notes
+        const books = await Book.aggregate([
+            {
+                $project: {
+                    title: 1,
+                    imageUrl: 1,
+                    author: 1,
+                    year: 1,
+                    genre: 1,
+                    averageRating: { $avg: '$ratings.grade' },
+                },
+            },
+            {
+                $sort: { averageRating: -1 },
+            },
+            {
+                $limit: 3,
+            },
+        ])
+
+        // Envoyer une réponse avec les meilleurs livres
+        res.status(200).json(books)
+    } catch (error) {
+        // Gérer les erreurs et renvoyer une réponse avec l'erreur
+        res.status(400).json({ error })
+    }
+}
+
+
+
+
+
 
