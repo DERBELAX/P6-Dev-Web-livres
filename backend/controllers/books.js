@@ -5,7 +5,6 @@ const path = require('path');
 // Création d'un livre //
 exports.createBook = (req, res, next) => {
     let bookObject;
-    
     try {
         bookObject = JSON.parse(req.body.book);
     } catch (error) {
@@ -153,38 +152,11 @@ exports.createRating = async (req, res) => {
         res.status(500).json({ error })
     }
 };
-exports.getBestBooks = async (req, res) => {
-    try {
-        // Utiliser l'agrégation MongoDB pour projeter les champs souhaités et calculer la moyenne des notes
-        const books = await Book.aggregate([
-            {
-                $project: {
-                    title: 1,
-                    imageUrl: 1,
-                    author: 1,
-                    year: 1,
-                    genre: 1,
-                    averageRating: { $avg: '$ratings.grade' },
-                },
-            },
-            {
-                $sort: { averageRating: -1 },
-            },
-            {
-                $limit: 3,
-            },
-        ])
-
-        // Envoyer une réponse avec les meilleurs livres
-        res.status(200).json(books)
-    } catch (error) {
-        // Gérer les erreurs et renvoyer une réponse avec l'erreur
-        res.status(400).json({ error })
-    }
-}
-
-
-
-
-
-
+// Récupération des 3 meilleures notations //
+exports.getbestrating = (req, res, next) => {
+    Book.find()
+    .sort({ averageRating: -1 })
+    .limit(3)
+    .then(books => res.status(200).json(books))
+    .catch(error => res.status(400).json({ error }));
+};
