@@ -1,16 +1,17 @@
+
 const express = require('express');
-const path = require('path'); 
 const mongoose = require('mongoose');
+const path = require('path');
 const bookRoutes = require('./routes/book');
 const userRoutes = require('./routes/user');
+const app = express();
 
-// Connect to MongoDB  
+
+
 mongoose.connect('mongodb+srv://marwa21:h9n5_PKMD@cluster0.tysoz.mongodb.net/',
     { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connexion à MongoDB réussie !'))
     .catch(() => console.log('Connexion à MongoDB échouée !'));
- 
-const app = express();
 
 // CORS middleware
 app.use((req, res, next) => {
