@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const bookRoutes = require('./routes/book');
 const userRoutes = require('./routes/user');
-const authMiddleware= require('./middleware/auth');
+const authMiddleware= require('./middleware/auth')
 const app = express();
 
 mongoose.connect(process.env.MONGODB_URI,
@@ -23,14 +23,7 @@ app.use((req, res, next) => {
 // Middleware for parsing JSON
 app.use(express.json());
 
-// Protect this route with the auth middleware
-app.get('/protected-route', authMiddleware, (req, res) => {
-    res.status(200).json({ message: 'You are authenticated!', userId: req.auth.userId });
-});
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-});
 // Route handlers
 app.use('/api/books', bookRoutes);
 app.use('/api/auth', userRoutes);
