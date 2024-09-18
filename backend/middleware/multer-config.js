@@ -1,8 +1,9 @@
-const multer = require('multer');
-const path = require('path');
-const sharp = require('sharp');
-const fs = require('fs');
+const multer = require('multer');// Gestion de l'upload des fichiers
+const path = require('path');// Gestion des chemins de fichiers et des extensions
+const sharp = require('sharp'); 
+const fs = require('fs'); 
 
+// Types MIME acceptés pour les images et leurs extensions correspondantes
 const MIME_TYPES = {
   'image/jpg': 'jpg',
   'image/jpeg': 'jpg',
@@ -14,6 +15,7 @@ const storage = multer.diskStorage({
   destination: (req, file, callback) => {
     callback(null, 'images'); // Dossier de destination pour les fichiers
   },
+   // Génération du nom du fichier
   filename: (req, file, callback) => {
     const name = file.originalname.split(' ').join('_'); // Remplacement des espaces par des underscores dans le nom du fichier
     const extension = MIME_TYPES[file.mimetype]; // Obtention de l'extension du fichier
@@ -35,7 +37,7 @@ const optimizeImage = async (req, res, next) => {
   try {
     sharp.cache(false); // Désactiver le cache de sharp pour cette opération
     await sharp(originalImagePath)
-      .resize({ width: 160, height: 260 }) 
+      .resize({ width: 206, height: 260 }) 
       .webp({ quality: 80 }) 
       .toFile(optimizedImagePath); // Enregistrement de l'image optimisée
       req.file.filename = optimizedImageName
